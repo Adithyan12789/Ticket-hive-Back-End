@@ -40,7 +40,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static('Back-End/public'));
+const staticPath = path.join(__dirname, process.env.NODE_ENV === 'production' ? '../public' : 'public');
+app.use(express.static(staticPath));
 
 app.use("/api/users", UserRoutes);
 app.use("/api/admin", AdminRoutes);
