@@ -7,12 +7,18 @@ class Database {
             const conn = await mongoose.connect(process.env.MONGO_URI as string);
             console.log(`MongoDB Connected: ${conn.connection.host}`);
         } catch (error) {
+            console.error("❌ MONGODB CONNECTION ERROR ❌");
             if (error instanceof Error) {
-                console.log(`Error: ${error.message}`);
+                console.error(`Message: ${error.message}`);
+                if (error.message.includes("authentication failed")) {
+                    console.error("💡 HINT: Check your MONGO_URI in Render Authentication.");
+                    console.error("   - Ensure your password has no unencoded special characters like @, :, /");
+                    console.error("   - If your password is 'pass@123', write it as 'pass%40123'");
+                }
             } else {
-                console.log(`Unexpected error: ${error}`);
+                console.error(`Unexpected error: ${error}`);
             }
-            process.exit(1);
+            // process.exit(1); // COMMENTED OUT FOR DEBUGGING - Keep server alive to see logs
         }
     }
 }
