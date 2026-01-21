@@ -4,6 +4,8 @@ import path from "path";
 // CRITICAL: Initialize dotenv before any other imports that might depend on env vars
 dotenv.config({ path: path.join(__dirname, ".env") });
 console.log("Backend Environment Status Check:");
+console.log("- PORT:", process.env.PORT || 5000);
+console.log("- MONGO_URI:", process.env.MONGO_URI ? "Loaded" : "MISSING");
 console.log("- ADMIN_EMAIL:", process.env.ADMIN_EMAIL ? "Loaded" : "MISSING");
 console.log("- JWT_SECRET_ADMIN:", process.env.JWT_SECRET_ADMIN ? "Loaded" : "MISSING");
 
