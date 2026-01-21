@@ -25,16 +25,20 @@ let AdminController = class AdminController {
     constructor(adminService) {
         this.adminService = adminService;
         this.adminLogin = (0, express_async_handler_1.default)(async (req, res) => {
+            console.log("AdminController: Received login request. Body keys:", Object.keys(req.body || {}));
             const { email, password } = req.body;
             if (!email || !password) {
                 res.status(400).json({ message: "Email and password are required" });
                 return;
             }
             try {
+                console.log(`Admin login attempt for email: ${email}`);
                 const adminData = await this.adminService.adminLoginService(email, password, res);
+                console.log("Admin login successful");
                 res.status(200).json(adminData);
             }
             catch (error) {
+                console.error(`Admin login failed: ${error.message}`);
                 res.status(400).json({ message: error.message });
             }
         });

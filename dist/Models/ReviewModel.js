@@ -28,11 +28,21 @@ const mongoose_1 = __importStar(require("mongoose"));
 const ReviewSchema = new mongoose_1.Schema({
     user: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User", required: true },
     movie: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Movie", required: true },
-    rating: { type: Number, required: true, min: 0, max: 10 },
+    rating: { type: Number, required: true, min: 0, max: 5 },
     comment: { type: String, required: false },
-    likes: { type: Number, default: 0 },
-    dislikes: { type: Number, default: 0 },
+    likedBy: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" }],
+    dislikedBy: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" }],
     createdAt: { type: Date, default: Date.now },
-}, { timestamps: true });
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+ReviewSchema.virtual('likes').get(function () {
+    return this.likedBy ? this.likedBy.length : 0;
+});
+ReviewSchema.virtual('dislikes').get(function () {
+    return this.dislikedBy ? this.dislikedBy.length : 0;
+});
 exports.Review = (0, mongoose_1.model)("Review", ReviewSchema);
 //# sourceMappingURL=ReviewModel.js.map

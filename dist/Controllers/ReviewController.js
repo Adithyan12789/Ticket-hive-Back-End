@@ -78,6 +78,33 @@ let ReviewController = class ReviewController {
                 res.status(500).json({ message: "Error adding review", error });
             }
         });
+        this.voteReviewController = (0, express_async_handler_1.default)(async (req, res) => {
+            const { reviewId } = req.params;
+            const { userId, action } = req.body;
+            if (!mongoose_1.default.Types.ObjectId.isValid(reviewId) || !mongoose_1.default.Types.ObjectId.isValid(userId)) {
+                res.status(400).json({ message: "Invalid Review or User ID" });
+                return;
+            }
+            if (!['like', 'dislike'].includes(action)) {
+                res.status(400).json({ message: "Invalid action" });
+                return;
+            }
+            try {
+                const updatedReview = await this.reviewService.voteReview(reviewId, userId, action);
+                if (!updatedReview) {
+                    res.status(404).json({ message: "Review not found" });
+                    return;
+                }
+                res.status(200).json({
+                    message: "Vote recorded successfully",
+                    review: updatedReview,
+                });
+            }
+            catch (error) {
+                console.error("Error voting review:", error);
+                res.status(500).json({ message: "Error voting review", error });
+            }
+        });
     }
 };
 exports.ReviewController = ReviewController;

@@ -33,10 +33,14 @@ let AdminService = class AdminService {
         this.adminRepository = adminRepository;
     }
     async adminLoginService(email, password, res) {
+        console.log("AdminService: Beginning login service logic for", email);
         const { email: adminEmail, password: adminPassword } = await this.adminRepository.authenticateAdmin(email, password);
+        console.log("AdminService: Repository authentication successful");
         let _id = "";
         let existingAdmin = await AdminModel_1.default.findOne({ email: adminEmail });
+        console.log("AdminService: Database lookup complete. Found:", !!existingAdmin);
         if (!existingAdmin) {
+            console.log("AdminService: Admin not found in DB, creating first-time admin entry");
             const newAdmin = new AdminModel_1.default({
                 name: "Admin",
                 email: adminEmail,
@@ -44,9 +48,16 @@ let AdminService = class AdminService {
             });
             await newAdmin.save();
             existingAdmin = newAdmin;
+            console.log("AdminService: New admin entry saved successfully");
+        }
+        if (!existingAdmin || !existingAdmin._id) {
+            console.error("AdminService: Admin object or ID is missing after DB operations");
+            throw new Error("Database error: Could not retrieve Admin ID");
         }
         _id = existingAdmin._id.toString();
+        console.log("AdminService: Generating token for ID:", _id);
         const token = GenerateAdminToken_1.default.generateAdminToken(res, _id);
+        console.log("AdminService: Token generation successful");
         return {
             _id,
             name: "Admin",

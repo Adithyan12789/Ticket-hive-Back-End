@@ -30,6 +30,9 @@ let ReviewService = class ReviewService {
     async updateAverageRating(movieId) {
         await this.reviewRepository.updateAverageRating(movieId);
     }
+    async voteReview(reviewId, userId, action) {
+        return await this.reviewRepository.voteReview(reviewId, userId, action);
+    }
 };
 exports.ReviewService = ReviewService;
 exports.ReviewService = ReviewService = __decorate([

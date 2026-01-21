@@ -14,6 +14,7 @@ const inversify_1 = require("inversify");
 const BaseRepository_1 = require("./Base/BaseRepository");
 const ReviewModel_1 = require("../Models/ReviewModel");
 const MoviesModel_1 = require("../Models/MoviesModel");
+const mongoose_1 = require("mongoose");
 let ReviewRepository = class ReviewRepository extends BaseRepository_1.BaseRepository {
     constructor() {
         super(ReviewModel_1.Review);
@@ -48,6 +49,42 @@ let ReviewRepository = class ReviewRepository extends BaseRepository_1.BaseRepos
         else {
             await MoviesModel_1.Movie.findByIdAndUpdate(movieId, { averageRating: 0 });
         }
+    }
+    async voteReview(reviewId, userId, action) {
+        const review = await ReviewModel_1.Review.findById(reviewId);
+        if (!review)
+            return null;
+        if (!review.likedBy)
+            review.likedBy = [];
+        if (!review.dislikedBy)
+            review.dislikedBy = [];
+        const userIdObj = new mongoose_1.Types.ObjectId(userId);
+        const likedIndex = review.likedBy.findIndex((id) => id.toString() === userId);
+        const dislikedIndex = review.dislikedBy.findIndex((id) => id.toString() === userId);
+        if (action === 'like') {
+            if (likedIndex !== -1) {
+                review.likedBy.splice(likedIndex, 1);
+            }
+            else {
+                review.likedBy.push(userIdObj);
+                if (dislikedIndex !== -1) {
+                    review.dislikedBy.splice(dislikedIndex, 1);
+                }
+            }
+        }
+        else if (action === 'dislike') {
+            if (dislikedIndex !== -1) {
+                review.dislikedBy.splice(dislikedIndex, 1);
+            }
+            else {
+                review.dislikedBy.push(userIdObj);
+                if (likedIndex !== -1) {
+                    review.likedBy.splice(likedIndex, 1);
+                }
+            }
+        }
+        await review.save();
+        return review;
     }
 };
 exports.ReviewRepository = ReviewRepository;

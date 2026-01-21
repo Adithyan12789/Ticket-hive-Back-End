@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminRepository = void 0;
-const dotenv_1 = __importDefault(require("dotenv"));
 const UserModel_1 = __importDefault(require("../Models/UserModel"));
 const TheaterOwnerModel_1 = __importDefault(require("../Models/TheaterOwnerModel"));
 const TheaterDetailsModel_1 = __importDefault(require("../Models/TheaterDetailsModel"));
@@ -22,18 +21,27 @@ const bookingModel_1 = require("../Models/bookingModel");
 const AdminModel_1 = __importDefault(require("../Models/AdminModel"));
 const inversify_1 = require("inversify");
 const BaseRepository_1 = require("./Base/BaseRepository");
-dotenv_1.default.config();
 let AdminRepository = class AdminRepository extends BaseRepository_1.BaseRepository {
     constructor() {
         super(AdminModel_1.default);
         this.adminModel = AdminModel_1.default;
     }
     async authenticateAdmin(email, password) {
-        const { ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
-        if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+        console.log("Admin Auth Process - Env check:", {
+            emailExists: !!adminEmail,
+            passExists: !!adminPassword
+        });
+        if (!adminEmail || !adminPassword) {
+            console.error("CRITICAL: Admin credentials missing in process.env");
+            throw new Error("Admin credentials not configured");
+        }
+        if (email.trim() !== adminEmail.trim() || password.trim() !== adminPassword.trim()) {
+            console.warn("Auth mismatch: Received", { email });
             throw new Error("Invalid Admin Email or Password");
         }
-        return { email: ADMIN_EMAIL, password: ADMIN_PASSWORD };
+        return { email: adminEmail, password: adminPassword };
     }
     async getAdminCredentials() {
         const adminEmail = process.env.ADMIN_EMAIL;
@@ -107,7 +115,7 @@ let AdminRepository = class AdminRepository extends BaseRepository_1.BaseReposit
     }
     async getPendingTheaterOwnerVerifications() {
         try {
-            await TheaterDetailsModel_1.default.find({ verificationStatus: "pending" }).select("-password");
+            return await TheaterDetailsModel_1.default.find({ verificationStatus: "pending" }).select("-password");
         }
         catch (error) {
             console.error("Error fetching pending theater verifications:", error);

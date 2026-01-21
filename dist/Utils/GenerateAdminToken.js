@@ -12,9 +12,11 @@ class AdminTokenService {
         this.jwtSecret = process.env.JWT_SECRET_ADMIN;
     }
     generateAdminToken(res, adminId) {
+        console.log("AdminTokenService: Signing JWT for adminId:", adminId);
         const token = jsonwebtoken_1.default.sign({ adminId }, this.jwtSecret, {
             expiresIn: '30d',
         });
+        console.log("AdminTokenService: Setting cookie 'jwtAdmin'");
         res.cookie('jwtAdmin', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -22,6 +24,7 @@ class AdminTokenService {
             maxAge: 30 * 24 * 60 * 60 * 1000,
             path: '/',
         });
+        return token;
     }
 }
 exports.default = new AdminTokenService();

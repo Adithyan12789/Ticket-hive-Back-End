@@ -140,7 +140,7 @@ let UserController = class UserController {
                     if (err.message === "Email already exists.") {
                         res
                             .status(400)
-                            .json({ message: "User with this email already exists" });
+                            .json({ message: "This email is already exist" });
                     }
                     else if (err.message === "Email exists but OTP is not verified.") {
                         res
@@ -150,11 +150,11 @@ let UserController = class UserController {
                     else {
                         res
                             .status(500)
-                            .json({ message: "An error occurred during registration" });
+                            .json({ message: "An error occurred during registration", error: err.message });
                     }
                 }
                 else {
-                    res.status(500).json({ message: "An unexpected error occurred" });
+                    res.status(500).json({ message: "An unexpected error occurred", error: String(err) });
                 }
             }
         });
@@ -176,7 +176,7 @@ let UserController = class UserController {
                 else {
                     res
                         .status(500)
-                        .json({ message: "An error occurred during OTP verification" });
+                        .json({ message: "An error occurred during OTP verification", error: String(err) });
                 }
             }
         });
@@ -197,7 +197,7 @@ let UserController = class UserController {
                         .json({ message: "Failed to resend OTP. Please try again" });
                 }
                 else {
-                    res.status(500).json({ message: "An unexpected error occurred" });
+                    res.status(500).json({ message: "An unexpected error occurred", error: String(err) });
                 }
             }
         });
@@ -334,7 +334,7 @@ let UserController = class UserController {
             try {
                 const offers = await this.userService.getOffersByTheaterIdService(theaterId);
                 if (!offers || offers.length === 0) {
-                    res.status(404).json({ message: "Offers not found" });
+                    res.status(200).json([]);
                     return;
                 }
                 const bookings = await bookingModel_1.Booking.find({ user: userId })

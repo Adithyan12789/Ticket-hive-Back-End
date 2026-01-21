@@ -40,6 +40,9 @@ MovieImageUploads.customStorage = {
             case 'castImages':
                 directory = "CastsImages";
                 break;
+            case 'banners':
+                directory = "MovieBanners";
+                break;
             default:
                 return cb(new Error("Invalid field name"));
         }
@@ -62,7 +65,8 @@ MovieImageUploads.customStorage = {
     _removeFile: (req, file, cb) => {
         const directory = file.fieldname === 'poster' ? "MoviePosters" :
             file.fieldname === 'movieImages' ? "MovieImages" :
-                "CastsImages";
+                file.fieldname === 'banners' ? "MovieBanners" :
+                    "CastsImages";
         const filePath = path_1.default.join(baseDir, "Back-End/public", directory, file.filename);
         fs_1.default.unlink(filePath, (err) => cb(err));
     }
@@ -75,6 +79,7 @@ MovieImageUploads.multerUploadMultipleFields = (0, multer_1.default)({
     }
 }).fields([
     { name: 'poster', maxCount: 1 },
+    { name: 'banners', maxCount: 5 },
     { name: 'movieImages', maxCount: 10 },
     { name: 'castImages', maxCount: 5 }
 ]);

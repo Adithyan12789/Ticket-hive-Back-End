@@ -43,6 +43,7 @@ let UserRepository = class UserRepository extends BaseRepository_1.BaseRepositor
             otp,
             otpVerified: false,
             otpGeneratedAt: new Date(),
+            otpExpires: new Date(Date.now() + 5 * 60 * 1000),
         }, { new: true });
         if (!user) {
             throw new Error("Failed to update OTP for user");

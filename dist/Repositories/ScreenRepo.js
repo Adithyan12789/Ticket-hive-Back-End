@@ -45,7 +45,13 @@ let ScreenRepository = class ScreenRepository {
     }
     async createSchedule(scheduleData) {
         const newSchedule = new ScheduleModel_1.Schedule(scheduleData);
-        return await newSchedule.save();
+        const savedSchedule = await newSchedule.save();
+        if (savedSchedule.screen) {
+            await ScreensModel_1.Screens.findByIdAndUpdate(savedSchedule.screen, {
+                $push: { schedule: savedSchedule._id }
+            });
+        }
+        return savedSchedule;
     }
     async getScheduleById(scheduleId) {
         return await ScheduleModel_1.Schedule.findById(scheduleId);

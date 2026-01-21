@@ -34,6 +34,7 @@ const userSchema = new mongoose_1.Schema({
     password: { type: String, required: false },
     phone: { type: String, required: false },
     otp: { type: String, required: false },
+    otpExpires: { type: Date, required: false },
     otpVerified: { type: Boolean, default: false },
     otpGeneratedAt: { type: Date, default: Date.now },
     isBlocked: { type: Boolean, default: false },

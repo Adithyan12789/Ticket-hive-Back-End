@@ -37,6 +37,7 @@ const MovieSchema = new mongoose_1.Schema({
     director: { type: String, required: true },
     releaseDate: { type: Date, required: true },
     posters: { type: String, required: true },
+    banners: { type: [String], required: true },
     review: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Review" },
     averageRating: { type: Number, default: 0 },
 });

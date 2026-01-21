@@ -74,4 +74,6 @@ container.bind("IWalletRepository").to(WalletRepo_1.WalletRepository);
 container.bind("ScreenController").to(ScreenController_1.ScreenController);
 container.bind("IScreenService").to(ScreenService_1.ScreenService);
 container.bind("IScreenRepository").to(ScreenRepo_1.default);
+const CastController_1 = require("../Controllers/CastController");
+container.bind("CastController").to(CastController_1.CastController);
 //# sourceMappingURL=container.js.map

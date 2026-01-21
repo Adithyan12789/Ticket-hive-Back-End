@@ -43,13 +43,15 @@ let ScreenController = class ScreenController {
                 return;
             }
             const { theaterId } = req.params;
-            const { screenNumber, capacity, layout } = req.body;
+            const { screenNumber, capacity, layout, showTimes } = req.body;
+            console.log("DEBUG: ScreenController addScreen req.body.showTimes:", showTimes ? JSON.stringify(showTimes).substring(0, 200) : "undefined");
             try {
                 const newScreen = await this.screenService.addScreenHandler(req.user?._id, {
                     screenNumber,
                     capacity,
                     layout,
                     theater: theaterId,
+                    showTimes
                 });
                 res.status(201).json({
                     message: 'Screen added successfully',
@@ -64,7 +66,7 @@ let ScreenController = class ScreenController {
             const { theaterId, screenId } = req.params;
             const { screenNumber, capacity, layout } = req.body;
             try {
-                const updatedScreen = await this.screenService.editScreenHandler(req.user?._id, screenId, { screenNumber, capacity, layout });
+                const updatedScreen = await this.screenService.editScreenHandler(req.user?._id, screenId, { screenNumber, capacity, layout, showTimes: req.body.showTimes });
                 if (!updatedScreen) {
                     res.status(404).json({ message: 'Screen not found' });
                     return;

@@ -18,6 +18,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ScreenService = void 0;
 const inversify_1 = require("inversify");
 const date_fns_1 = require("date-fns");
+const mongoose_1 = __importDefault(require("mongoose"));
 const TheaterDetailsModel_1 = __importDefault(require("../Models/TheaterDetailsModel"));
 let ScreenService = class ScreenService {
     constructor(screenRepository) {
@@ -39,7 +40,21 @@ let ScreenService = class ScreenService {
                 capacity: screenData.capacity,
                 layout: transformedLayout,
             };
-            return await this.screenRepository.createScreen(newScreenData);
+            const newScreen = await this.screenRepository.createScreen(newScreenData);
+            console.log("DEBUG: ScreenService addScreenHandler newScreen created:", newScreen._id);
+            console.log("DEBUG: ScreenService addScreenHandler showTimes check:", screenData.showTimes && screenData.showTimes.length > 0);
+            if (screenData.showTimes && screenData.showTimes.length > 0) {
+                const today = new Date();
+                const formattedDate = (0, date_fns_1.format)(today, "yyyy-MM-dd");
+                console.log("DEBUG: Creating schedule for date:", formattedDate);
+                const schedule = await this.screenRepository.createSchedule({
+                    screen: newScreen._id,
+                    date: formattedDate,
+                    showTimes: screenData.showTimes,
+                });
+                console.log("DEBUG: Schedule created:", schedule._id);
+            }
+            return newScreen;
         }
         catch (error) {
             console.error("Service Error: ", error);
@@ -51,7 +66,32 @@ let ScreenService = class ScreenService {
         if (!screen) {
             throw new Error("Screen not found");
         }
-        return await this.screenRepository.updateScreen(screenId, updateData);
+        const updatedScreen = await this.screenRepository.updateScreen(screenId, {
+            screenNumber: updateData.screenNumber,
+            capacity: updateData.capacity,
+            layout: updateData.layout,
+        });
+        if (updateData.showTimes && updateData.showTimes.length > 0) {
+            const today = new Date();
+            const formattedDate = (0, date_fns_1.format)(today, "yyyy-MM-dd");
+            const existingSchedules = await this.screenRepository.getSchedulesByScreenId(screenId);
+            const todaySchedule = existingSchedules.find(s => (0, date_fns_1.format)(new Date(s.date), "yyyy-MM-dd") === formattedDate);
+            if (todaySchedule) {
+                await this.screenRepository.updateSchedule(todaySchedule._id, {
+                    showTimes: updateData.showTimes
+                });
+                console.log("DEBUG: Updated existing schedule:", todaySchedule._id);
+            }
+            else {
+                await this.screenRepository.createSchedule({
+                    screen: screenId,
+                    date: formattedDate,
+                    showTimes: updateData.showTimes,
+                });
+                console.log("DEBUG: Created new schedule for update.");
+            }
+        }
+        return updatedScreen;
     }
     async addScheduleHandler(screenId, scheduleData) {
         const screen = await this.screenRepository.getScreenById(screenId);
@@ -73,6 +113,9 @@ let ScreenService = class ScreenService {
         return await this.screenRepository.updateSchedule(scheduleId, updateData);
     }
     async deleteScreenHandler(screenId) {
+        if (!mongoose_1.default.isValidObjectId(screenId)) {
+            throw new Error("Invalid screenId format");
+        }
         return await this.screenRepository.deleteScreen(screenId);
     }
     async getScreenByIdHandler(screenId) {

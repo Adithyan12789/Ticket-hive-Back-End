@@ -26,13 +26,13 @@ router.put('/verification/:theaterId/accept', AdminAuthMiddleware_1.AdminAuthMid
 router.put('/verification/:adminId/reject', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, adminController.rejectVerification);
 router.post('/add-movie', MovieMulter_1.default.multerUploadMultipleFields, (req, res, next) => {
     next();
-}, movieControllerr.addMovieController);
-router.get('/get-movies', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, movieControllerr.getAllMoviesController);
-router.get('/movie-details/:id', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, movieControllerr.getMovieByIdHandler);
+}, (req, res) => movieControllerr.addMovieController(req, res));
+router.get('/get-movies', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, (req, res) => movieControllerr.getAllMoviesController(req, res));
+router.get('/movie-details/:id', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, (req, res) => movieControllerr.getMovieByIdHandler(req, res));
 router.put('/movie-edit/:id', MovieMulter_1.default.multerUploadMultipleFields, (req, res, next) => {
     next();
-}, movieControllerr.updateMovieHandler);
-router.delete('/movie-delete/:id', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, movieControllerr.deleteMovieHandler);
+}, (req, res) => movieControllerr.updateMovieHandler(req, res));
+router.delete('/movie-delete/:id', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, (req, res) => movieControllerr.deleteMovieHandler(req, res));
 router.get('/getAlltickets', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, adminController.getAllTickets);
 router.get("/get-ticketDetail/:bookingId", AdminAuthMiddleware_1.AdminAuthMiddleware.protect, bookingControllerr.getBookingDetails);
 router.put("/tickets/:ticketId", AdminAuthMiddleware_1.AdminAuthMiddleware.protect, bookingControllerr.updateTicket);
@@ -44,6 +44,11 @@ router.route('/chatrooms/:chatRoomId/messages').get(AdminAuthMiddleware_1.AdminA
 router.route('/mark-messages-read').post(AdminAuthMiddleware_1.AdminAuthMiddleware.protect, chatControllerr.markAdminMessagesAsRead);
 router.get('/notifications/unread', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, chatControllerr.getAdminUnreadMessages);
 router.put('/notifications/:id/read', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, chatControllerr.markAdminMessagesAsRead);
+const CastMulter_1 = __importDefault(require("../Config/Multer/CastMulter"));
+const castController = container_1.container.get("CastController");
+router.post('/add-cast', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, CastMulter_1.default.uploadCastImage, (req, res) => castController.addCast(req, res));
+router.get('/get-cast', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, (req, res) => castController.getAllCast(req, res));
+router.delete('/delete-cast/:id', AdminAuthMiddleware_1.AdminAuthMiddleware.protect, (req, res) => castController.deleteCast(req, res));
 router.post('/admin-logout', adminController.adminLogout);
 exports.default = router;
 //# sourceMappingURL=AdminRoutes.js.map

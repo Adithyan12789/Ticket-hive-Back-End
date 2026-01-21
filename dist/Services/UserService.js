@@ -118,7 +118,13 @@ let UserService = class UserService {
             if (!existingUser.otpVerified) {
                 const otp = crypto_1.default.randomInt(100000, 999999).toString();
                 const updatedUser = await this.userRepository.updateUserOtp(email, otp);
-                await EmailUtil_1.default.sendOtpEmail(email, otp);
+                console.log("Resending OTP to existing unverified user:", otp);
+                try {
+                    await EmailUtil_1.default.sendOtpEmail(email, otp);
+                }
+                catch (emailError) {
+                    console.error("Failed to send OTP email (existing user), but proceeding for dev:", emailError);
+                }
                 return updatedUser;
             }
             throw new Error("Email already exists.");
@@ -133,8 +139,15 @@ let UserService = class UserService {
             password: hashedPassword,
             otp,
             otpVerified: false,
+            otpExpires: new Date(Date.now() + 5 * 60 * 1000),
         });
-        await EmailUtil_1.default.sendOtpEmail(email, otp);
+        console.log("Generated OTP during Registration:", otp);
+        try {
+            await EmailUtil_1.default.sendOtpEmail(email, otp);
+        }
+        catch (emailError) {
+            console.error("Failed to send OTP email, but proceeding for dev:", emailError);
+        }
         return newUser;
     }
     async verifyOtpService(email, otp) {
@@ -142,13 +155,25 @@ let UserService = class UserService {
         if (!user) {
             throw new Error("User not found");
         }
-        const OTP_EXPIRATION_TIME = 5 * 60 * 1000;
-        if (!user.otpGeneratedAt) {
-            throw new Error("OTP generation time is missing");
+        console.log(`Verifying OTP: Submitted: ${otp}, Stored: ${user.otp}`);
+        console.log(`User Timestamps: otpExpires: ${user.otpExpires}, otpGeneratedAt: ${user.otpGeneratedAt}`);
+        const currentTime = new Date().getTime();
+        if (user.otpExpires) {
+            if (currentTime > new Date(user.otpExpires).getTime()) {
+                throw new Error("OTP expired");
+            }
         }
-        const otpGeneratedAt = user.otpGeneratedAt || new Date(0);
-        if (new Date().getTime() - otpGeneratedAt.getTime() > OTP_EXPIRATION_TIME) {
-            throw new Error("OTP expired");
+        else {
+            if (!user.otpGeneratedAt) {
+                console.log("Warning: otpGeneratedAt is missing for fallback check.");
+            }
+            else {
+                const OTP_EXPIRATION_TIME = 5 * 60 * 1000;
+                const otpGeneratedAt = new Date(user.otpGeneratedAt).getTime();
+                if (currentTime - otpGeneratedAt > OTP_EXPIRATION_TIME) {
+                    throw new Error("OTP expired");
+                }
+            }
         }
         if (String(user.otp) === String(otp)) {
             user.otpVerified = true;
@@ -171,11 +196,12 @@ let UserService = class UserService {
         catch (err) {
             throw new Error("Failed to save user with new OTP");
         }
+        console.log("Resending OTP:", otp);
         try {
             await EmailUtil_1.default.sendOtpEmail(user.email, otp);
         }
         catch (err) {
-            throw new Error("Failed to send OTP email");
+            console.error("Failed to send OTP email (resend), but proceeding for dev:", err);
         }
         return user;
     }

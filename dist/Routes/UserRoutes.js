@@ -30,14 +30,15 @@ router.route('/profile')
     .get(AuthMiddleware_1.AuthMiddleware, userControllerr.getUserProfile)
     .put(AuthMiddleware_1.AuthMiddleware, UserMulter_1.default.multerUploadUserProfile.single('profileImage'), userControllerr.updateUserProfile);
 router.get('/get-movies', (req, res) => movieController.getAllMoviesController(req, res));
-router.get('/movie-detail/:id', AuthMiddleware_1.AuthMiddleware, movieController.getMovieByIdHandler);
-router.get('/reviews/:movieId', AuthMiddleware_1.AuthMiddleware, reviewControllerr.getReviewsController);
-router.get('/allReviews', AuthMiddleware_1.AuthMiddleware, reviewControllerr.getAllReviewsController);
+router.get('/movie-detail/:id', (req, res) => movieController.getMovieByIdHandler(req, res));
+router.get('/reviews/:movieId', reviewControllerr.getReviewsController);
+router.get('/allReviews', reviewControllerr.getAllReviewsController);
 router.post('/reviews', AuthMiddleware_1.AuthMiddleware, reviewControllerr.addReviewsController);
-router.get('/movie-theaters/:movieTitle', AuthMiddleware_1.AuthMiddleware, theaterControllerr.getTheatersByMovieTitle);
-router.get('/screen/:screenId', AuthMiddleware_1.AuthMiddleware, screenControllerr.getScreensById);
+router.put('/reviews/:reviewId/vote', AuthMiddleware_1.AuthMiddleware, reviewControllerr.voteReviewController);
+router.get('/movie-theaters/:movieTitle', theaterControllerr.getTheatersByMovieTitle);
+router.get('/screen/:screenId', screenControllerr.getScreensById);
 router.post('/update-availability', AuthMiddleware_1.AuthMiddleware, screenControllerr.updateSeatAvailability);
-router.get('/offers/:theaterId', AuthMiddleware_1.AuthMiddleware, userControllerr.getOffersByTheaterId);
+router.get('/offers/:theaterId', userControllerr.getOffersByTheaterId);
 router.post('/book-ticket', AuthMiddleware_1.AuthMiddleware, bookingControllerr.createBooking);
 router.get('/get-tickets/:userId', AuthMiddleware_1.AuthMiddleware, bookingControllerr.getAllTickets);
 router.get("/tickets/:ticketId", AuthMiddleware_1.AuthMiddleware, bookingControllerr.getTicketDetails);
