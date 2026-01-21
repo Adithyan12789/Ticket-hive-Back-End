@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
-    "start": "node dist/server.js",
+    "start": "node --max-old-space-size=460 dist/server.js",
     "dev": "nodemon --exec ts-node server.ts"
   },
   "author": "",

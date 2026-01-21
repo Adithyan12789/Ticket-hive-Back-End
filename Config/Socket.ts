@@ -31,10 +31,16 @@ const io = new Server(server, {
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
   },
-  // Add connection timeout and other options
+  // Optimized settings for Render free tier
   pingTimeout: 60000,
   pingInterval: 25000,
+  connectTimeout: 45000,
   transports: ['websocket', 'polling'],
+  // Allow more time for initial connection (important for cold starts)
+  allowUpgrades: true,
+  perMessageDeflate: false, // Disable compression to save memory
+  httpCompression: false, // Disable HTTP compression to save memory
+  maxHttpBufferSize: 1e6, // 1MB limit
 });
 
 app.use((req, res, next) => {

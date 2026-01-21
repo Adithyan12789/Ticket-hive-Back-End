@@ -13,15 +13,34 @@ const server = http_1.default.createServer(app);
 exports.server = server;
 const io = new socket_io_1.Server(server, {
     cors: {
-        origin: [
-            "http://localhost:3000",
-            "https://www.tickethive.fun",
-            "https://ticket-hive-dusky.vercel.app/",
-            "https://ticket-hive-three.vercel.app"
-        ],
+        origin: (origin, callback) => {
+            const allowedOrigins = [
+                "http://localhost:3000",
+                "https://ticket-hive-awft.vercel.app"
+            ];
+            if (!origin)
+                return callback(null, true);
+            const normalizedOrigin = origin.replace(/\/$/, '');
+            if (allowedOrigins.includes(normalizedOrigin)) {
+                callback(null, true);
+            }
+            else {
+                console.warn(`CORS blocked origin: ${origin}`);
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         methods: ["GET", "POST"],
         credentials: true,
+        allowedHeaders: ["Content-Type", "Authorization"],
     },
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    connectTimeout: 45000,
+    transports: ['websocket', 'polling'],
+    allowUpgrades: true,
+    perMessageDeflate: false,
+    httpCompression: false,
+    maxHttpBufferSize: 1e6,
 });
 exports.io = io;
 app.use((req, res, next) => {
