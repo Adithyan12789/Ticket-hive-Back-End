@@ -24,9 +24,28 @@ Database.connectDB();
 const port = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: ["http://localhost:3000", "https://ticket-hive-awft.vercel.app", "https://ticket-hive-awft.vercel.app/"],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "https://ticket-hive-awft.vercel.app"
+    ];
+
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Remove trailing slash for comparison
+    const normalizedOrigin = origin.replace(/\/$/, '');
+
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use(express.json());
@@ -42,6 +61,16 @@ app.use((req, res, next) => {
 
 const staticPath = path.join(__dirname, process.env.NODE_ENV === 'production' ? '../public' : 'public');
 app.use(express.static(staticPath));
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
+  });
+});
 
 app.use("/api/users", UserRoutes);
 app.use("/api/admin", AdminRoutes);
