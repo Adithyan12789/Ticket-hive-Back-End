@@ -9,10 +9,9 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      "http://localhost:3000", 
-      "https://www.tickethive.fun", 
-      "https://ticket-hive-dusky.vercel.app/",
-      "https://ticket-hive-three.vercel.app" // Added Render frontend URL
+      "http://localhost:3000",
+      "https://ticket-hive-awft.vercel.app",
+      "https://ticket-hive-awft.vercel.app/"
     ],
     methods: ["GET", "POST"],
     credentials: true,

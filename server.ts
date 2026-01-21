@@ -24,7 +24,7 @@ Database.connectDB();
 const port = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: ["http://localhost:3000", "https://ticket-hive-awft.vercel.app"],
+  origin: ["http://localhost:3000", "https://ticket-hive-awft.vercel.app", "https://ticket-hive-awft.vercel.app/"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
