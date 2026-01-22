@@ -20,17 +20,17 @@ export class AdminRepository extends BaseRepository<IAdmin> implements IAdminRep
     email: string,
     password: string
   ): Promise<AdminLogin> {
-    const adminEmail = process.env.ADMIN_EMAIL;
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    const adminEmail = process.env.ADMIN_EMAIL || "";
+    const adminPassword = process.env.ADMIN_PASSWORD || "";
 
     console.log("Admin Auth Process - Env check:", {
-      emailExists: !!adminEmail,
-      passExists: !!adminPassword
+      emailExists: !!process.env.ADMIN_EMAIL,
+      passExists: !!process.env.ADMIN_PASSWORD
     });
 
-    if (!adminEmail || !adminPassword) {
+    if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
       console.error("CRITICAL: Admin credentials missing in process.env");
-      throw new Error("Admin credentials not configured");
+      throw new Error("Admin credentials not configured on server");
     }
 
     if (email.trim() !== adminEmail.trim() || password.trim() !== adminPassword.trim()) {
