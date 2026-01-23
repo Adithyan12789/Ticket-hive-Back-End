@@ -23,7 +23,7 @@ class MovieImageUploads {
           directory = "MoviePosters";
           break;
         case 'movieImages':
-          directory = "MovieImages";
+          directory = "movieImages";
           break;
         case 'castImages':
           directory = "CastsImages";
@@ -65,11 +65,17 @@ class MovieImageUploads {
     _removeFile: (req, file, cb) => {
       const directory =
         file.fieldname === 'poster' ? "MoviePosters" :
-          file.fieldname === 'movieImages' ? "MovieImages" :
+          file.fieldname === 'movieImages' ? "movieImages" :
             file.fieldname === 'banners' ? "MovieBanners" :
               "CastsImages";
 
-      const filePath = path.join(baseDir, "Back-End/public", directory, file.filename);
+      const basePublicPath = fs.existsSync(path.join(process.cwd(), "public"))
+        ? path.join(process.cwd(), "public")
+        : fs.existsSync(path.join(process.cwd(), "Back-End", "public"))
+          ? path.join(process.cwd(), "Back-End", "public")
+          : path.join(__dirname, "..", "..", "public");
+
+      const filePath = path.join(basePublicPath, directory, file.filename);
       fs.unlink(filePath, (err) => cb(err));
     }
   };

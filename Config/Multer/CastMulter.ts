@@ -19,7 +19,7 @@ class CastImageUploads {
                 ? path.join(process.cwd(), "Back-End", "public")
                 : path.join(__dirname, "..", "..", "public");
 
-        const uploadPath = path.join(basePublicPath, "CastImages");
+        const uploadPath = path.join(basePublicPath, "CastsImages");
         console.log("CastMulter: Target upload path is:", uploadPath);
         this.ensureDirectoryExists(uploadPath);
 
