@@ -15,7 +15,9 @@ class CastImageUploads {
         // Try to find the public folder relative to the current working directory
         const basePublicPath = fs.existsSync(path.join(process.cwd(), "public"))
             ? path.join(process.cwd(), "public")
-            : path.join(process.cwd(), "Back-End", "public");
+            : fs.existsSync(path.join(process.cwd(), "Back-End", "public"))
+                ? path.join(process.cwd(), "Back-End", "public")
+                : path.join(__dirname, "..", "..", "public");
 
         const uploadPath = path.join(basePublicPath, "CastImages");
         console.log("CastMulter: Target upload path is:", uploadPath);

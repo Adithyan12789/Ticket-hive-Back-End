@@ -12,7 +12,14 @@ class TheaterImageUploads {
   }
 
   private static createStorage(directory: string): StorageEngine {
-    const uploadPath = path.join(baseDir, "Back-End/public", directory);
+    // Robust public path detection
+    const basePublicPath = fs.existsSync(path.join(process.cwd(), "public"))
+      ? path.join(process.cwd(), "public")
+      : fs.existsSync(path.join(process.cwd(), "Back-End", "public"))
+        ? path.join(process.cwd(), "Back-End", "public")
+        : path.join(__dirname, "..", "..", "public");
+
+    const uploadPath = path.join(basePublicPath, directory);
     this.ensureDirectoryExists(uploadPath);
     console.log(`${directory} will be uploaded to: ${uploadPath}`);
 
@@ -39,7 +46,7 @@ class TheaterImageUploads {
 
   private static uploadCertificateStorage(): StorageEngine {
     return this.createStorage("UploadsCertificates");
-  }  
+  }
 
   private static chatStorage(): StorageEngine {
     return this.createStorage("MessageFiles");
@@ -84,7 +91,7 @@ class TheaterImageUploads {
           "Only images, PDFs, and certain document files are allowed!"
         ) as any,
         false
-      );           
+      );
     }
   }
 

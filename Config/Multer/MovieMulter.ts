@@ -35,7 +35,13 @@ class MovieImageUploads {
           return cb(new Error("Invalid field name"));
       }
 
-      const uploadPath = path.join(baseDir, "Back-End/public", directory);
+      const basePublicPath = fs.existsSync(path.join(process.cwd(), "public"))
+        ? path.join(process.cwd(), "public")
+        : fs.existsSync(path.join(process.cwd(), "Back-End", "public"))
+          ? path.join(process.cwd(), "Back-End", "public")
+          : path.join(__dirname, "..", "..", "public");
+
+      const uploadPath = path.join(basePublicPath, directory);
       this.ensureDirectoryExists(uploadPath);
       const filename = `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`;
       const fullPath = path.join(uploadPath, filename);
