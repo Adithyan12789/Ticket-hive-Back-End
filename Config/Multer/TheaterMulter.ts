@@ -45,7 +45,7 @@ class TheaterImageUploads {
   }
 
   private static uploadCertificateStorage(): StorageEngine {
-    return this.createStorage("UploadsCertificates");
+    return this.createStorage("UploadsCerificates");
   }
 
   private static chatStorage(): StorageEngine {

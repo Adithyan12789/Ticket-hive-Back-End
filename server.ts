@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
 
 // CRITICAL: Initialize dotenv before any other imports that might depend on env vars
 const envPath = path.resolve(process.cwd(), ".env");
@@ -66,8 +67,57 @@ app.use(morgan('dev'));
 //   next();
 // });
 
-const staticPath = path.join(__dirname, process.env.NODE_ENV === 'production' ? '../public' : 'public');
+
+const getStaticPath = () => {
+  const paths = [
+    path.join(process.cwd(), 'public'),
+    path.join(process.cwd(), 'Back-End', 'public'),
+    path.join(__dirname, 'public'),
+    path.join(__dirname, '../public'),
+    path.join(__dirname, '..', 'public')
+  ];
+
+  for (const p of paths) {
+    if (fs.existsSync(p)) {
+      console.log(`Found static folder at: ${p}`);
+      return p;
+    }
+  }
+
+  // Fallback to a default but log warning
+  const fallback = path.join(process.cwd(), 'public');
+  console.warn(`No static folder found in expected locations, falling back to: ${fallback}`);
+  return fallback;
+};
+
+const staticPath = getStaticPath();
 app.use(express.static(staticPath));
+
+// Explicit subfolder serving for extra robustness (some platforms need this)
+['CastsImages', 'CastImages', 'movieImages', 'MovieImages', 'MoviePosters', 'MovieBanners', 'TheatersImages', 'TheatersImage', 'UserProfileImages', 'TheaterProfileImages', 'MessageFiles', 'UploadsCerificates', 'UploadsCertificates'].forEach(folder => {
+  const folderPath = path.join(staticPath, folder);
+  if (fs.existsSync(folderPath)) {
+    app.use(`/${folder}`, express.static(folderPath));
+    // Also serve as lowercase alias for better compatibility
+    app.use(`/${folder.toLowerCase()}`, express.static(folderPath));
+  }
+});
+
+console.log("Static files will be served from:", staticPath);
+
+// Debugging middleware for static assets (only logs in dev/logs environment)
+app.use((req, res, next) => {
+  if (req.url.match(/\.(jpg|jpeg|png|gif|webp|avif|jfif|svg)$/i)) {
+    // Check if the requested file exists
+    const filePath = path.join(staticPath, req.url);
+    if (!fs.existsSync(filePath)) {
+      console.warn(`[404] Static file not found: ${req.url} (Looking in: ${filePath})`);
+    } else {
+      console.log(`[200] Serving static file: ${req.url}`);
+    }
+  }
+  next();
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -75,7 +125,9 @@ app.get('/health', (req, res) => {
     status: 'OK',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    memory: process.memoryUsage()
+    memory: process.memoryUsage(),
+    staticPath: staticPath,
+    exists: fs.existsSync(staticPath)
   });
 });
 
