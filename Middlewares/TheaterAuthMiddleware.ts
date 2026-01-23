@@ -13,11 +13,16 @@ interface CustomRequest extends Request {
 
 class TheaterAuthMiddleware {
   static protect = expressAsyncHandler(async (req: CustomRequest, res: Response, next: NextFunction) => {
-    const token: string | undefined = req.cookies?.theaterOwnerJwt;
+    let token: string | undefined = req.cookies?.theaterOwnerJwt;
+
+    // Fallback to Bearer token if cookie is missing
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
 
     if (!token) {
       res.status(401).json({ message: 'Not authorized, no token provided' });
-      return; // Ensure we exit the function early
+      return;
     }
 
     try {
@@ -25,13 +30,13 @@ class TheaterAuthMiddleware {
       const theaterOwner = await Theater.findById(decoded.id).select('-password');
 
       if (!theaterOwner) {
-        res.clearCookie('jwtTheaterOwner', { path: '/theater' });
+        res.clearCookie('theaterOwnerJwt', { path: '/' });
         res.status(401).json({ message: 'Theater owner not found' });
         return;
       }
 
       if (theaterOwner.isBlocked) {
-        res.clearCookie('jwtTheaterOwner', { path: '/theater' });
+        res.clearCookie('theaterOwnerJwt', { path: '/' });
         res.status(403).json({ message: 'Theater owner is blocked' });
         return;
       }
@@ -41,8 +46,9 @@ class TheaterAuthMiddleware {
         isBlocked: theaterOwner.isBlocked ?? false,
       };
 
-      next(); // Proceed to the next middleware
+      next();
     } catch (error) {
+      console.error("Theater Auth Error:", error);
       res.status(401).json({ message: 'Invalid or expired token' });
     }
   });

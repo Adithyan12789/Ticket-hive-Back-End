@@ -40,12 +40,13 @@ export class TheaterController {
           password
         );
 
-        TheaterTokenService.generateTheaterToken(res, theater._id.toString());
+        const token = TheaterTokenService.generateTheaterToken(res, theater._id.toString());
 
         res.status(200).json({
           id: theater._id,
           name: theater.name,
           email: theater.email,
+          token,
         });
       } catch (err: unknown) {
         if (err instanceof Error) {
