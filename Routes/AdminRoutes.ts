@@ -8,6 +8,8 @@ import { ChatController } from '../Controllers/ChatController';
 import { TheaterController } from '../Controllers/TheaterController';
 import { AdminController } from '../Controllers/AdminController';
 import { container } from '../Config/container';
+import { CastController } from '../Controllers/CastController';
+import CastImageUploads from '../Config/Multer/CastMulter';
 
 const router = express.Router();
 
@@ -16,6 +18,7 @@ const theaterControllerr = container.get<TheaterController>("TheaterController")
 const bookingControllerr = container.get<BookingController>("BookingController");
 const chatControllerr = container.get<ChatController>("ChatController");
 const movieControllerr = container.get<MovieController>("MovieController");
+const castController = container.get<CastController>("CastController");
 
 router.post('/admin-login', adminController.adminLogin);
 router.get('/get-user', AdminAuthMiddleware.protect, adminController.getAllUsers);
@@ -67,13 +70,9 @@ router.put('/notifications/:id/read', AdminAuthMiddleware.protect, chatControlle
 
 
 
-import { CastController } from '../Controllers/CastController';
-import CastImageUploads from '../Config/Multer/CastMulter';
-
-const castController = container.get<CastController>("CastController");
-
 router.post('/add-cast', AdminAuthMiddleware.protect, CastImageUploads.uploadCastImage, (req, res) => castController.addCast(req, res));
 router.get('/get-cast', AdminAuthMiddleware.protect, (req, res) => castController.getAllCast(req, res));
+router.put('/update-cast/:id', AdminAuthMiddleware.protect, CastImageUploads.uploadCastImage, (req, res) => castController.updateCast(req, res));
 router.delete('/delete-cast/:id', AdminAuthMiddleware.protect, (req, res) => castController.deleteCast(req, res));
 
 router.post('/admin-logout', adminController.adminLogout);

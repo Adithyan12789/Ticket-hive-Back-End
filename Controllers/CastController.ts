@@ -7,10 +7,14 @@ export class CastController {
 
     async addCast(req: Request, res: Response): Promise<void> {
         try {
+            console.log("Adding cast - Body:", req.body);
+            console.log("Adding cast - File:", req.file);
+
             const { name, role } = req.body;
             const file = req.file;
 
             if (!name || !role || !file) {
+                console.warn("Add Cast failed: Missing fields", { name, role, hasFile: !!file });
                 res.status(400).json({ message: "All fields are required" });
                 return;
             }
@@ -22,31 +26,77 @@ export class CastController {
             });
 
             await newCast.save();
+            console.log("Cast added successfully:", newCast._id);
             res.status(201).json({ message: "Cast added successfully", cast: newCast });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error adding cast:", error);
-            res.status(500).json({ message: "Server Error", error });
+            res.status(500).json({
+                message: "Server Error while adding cast",
+                error: error.message || error
+            });
         }
     }
 
     async getAllCast(req: Request, res: Response): Promise<void> {
         try {
-            const cast = await Cast.find();
+            console.log("Fetching all cast members");
+            const cast = await Cast.find().sort({ createdAt: -1 });
             res.status(200).json(cast);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error fetching cast:", error);
-            res.status(500).json({ message: "Server Error" });
+            res.status(500).json({
+                message: "Server Error while fetching cast",
+                error: error.message || error
+            });
         }
     }
 
     async deleteCast(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            await Cast.findByIdAndDelete(id);
+            console.log("Deleting cast with ID:", id);
+            const deleted = await Cast.findByIdAndDelete(id);
+            if (!deleted) {
+                res.status(404).json({ message: "Cast member not found" });
+                return;
+            }
             res.status(200).json({ message: "Cast deleted successfully" });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error deleting cast:", error);
-            res.status(500).json({ message: "Server Error" });
+            res.status(500).json({
+                message: "Server Error while deleting cast",
+                error: error.message || error
+            });
+        }
+    }
+
+    async updateCast(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const { name, role } = req.body;
+            const file = req.file;
+
+            console.log("Updating cast member with ID:", id);
+
+            const updateData: any = { name, role };
+            if (file) {
+                updateData.image = file.filename;
+            }
+
+            const updatedCast = await Cast.findByIdAndUpdate(id, updateData, { new: true });
+
+            if (!updatedCast) {
+                res.status(404).json({ message: "Cast member not found" });
+                return;
+            }
+
+            res.status(200).json({ message: "Cast updated successfully", cast: updatedCast });
+        } catch (error: any) {
+            console.error("Error updating cast:", error);
+            res.status(500).json({
+                message: "Server Error while updating cast",
+                error: error.message || error
+            });
         }
     }
 }
