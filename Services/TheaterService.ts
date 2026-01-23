@@ -151,8 +151,8 @@ export class TheaterService {
 
     try {
       await EmailUtil.sendOtpEmail(theater.email, otp);
-    } catch (err) {
-      throw new Error("Failed to send OTP email");
+    } catch (err: any) {
+      throw new Error(`Failed to send OTP email: ${err.message}`);
     }
 
     return theater;

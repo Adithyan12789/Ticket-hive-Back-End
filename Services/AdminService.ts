@@ -2,7 +2,7 @@ import mongoose, { Types } from "mongoose";
 import AdminRepository from "../Repositories/AdminRepo";
 import AdminTokenService from "../Utils/GenerateAdminToken";
 import { Request, Response } from "express";
-import nodemailer from "nodemailer";
+import EmailUtil from "../Utils/EmailUtil";
 import Admin from "../Models/AdminModel";
 import { inject, injectable } from "inversify";
 import { IAdminRepository } from "../Interface/IAdmin/IRepository";
@@ -24,14 +24,6 @@ export interface BookingDetails {
   seats: string[];
   status: "pending" | "completed" | "cancelled" | "failed";
 }
-
-const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  auth: {
-    user: "adithiruthiparambil12@gmail.com",
-    pass: "phfa kacx ozkz ueig",
-  },
-});
 
 @injectable()
 export class AdminService {
@@ -276,12 +268,7 @@ export class AdminService {
     message: string
   ) {
     try {
-      await transporter.sendMail({
-        from: "adithiruthiparambil12@gmail.com",
-        to: recipient,
-        subject: subject,
-        text: message,
-      });
+      await EmailUtil.sendEmail(recipient, subject, message);
     } catch (error) {
       console.error("Error sending email:", error);
       throw error;
