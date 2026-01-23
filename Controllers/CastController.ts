@@ -6,8 +6,9 @@ import { injectable } from "inversify";
 export class CastController {
 
     async addCast(req: Request, res: Response): Promise<void> {
+        console.log("-> Entering addCast controller");
         try {
-            console.log("Adding cast - Body:", req.body);
+            console.log("Adding cast - Body:", JSON.stringify(req.body));
             console.log("Adding cast - File:", req.file);
 
             const { name, role } = req.body;
@@ -38,9 +39,11 @@ export class CastController {
     }
 
     async getAllCast(req: Request, res: Response): Promise<void> {
+        console.log("-> Entering getAllCast controller");
         try {
-            console.log("Fetching all cast members");
-            const cast = await Cast.find().sort({ createdAt: -1 });
+            console.log("Fetching all cast members from DB (simple find)...");
+            const cast = await Cast.find();
+            console.log(`Fetched ${cast.length} cast members`);
             res.status(200).json(cast);
         } catch (error: any) {
             console.error("Error fetching cast:", error);

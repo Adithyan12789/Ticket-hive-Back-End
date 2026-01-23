@@ -86,10 +86,15 @@ app.use("/api/theater", TheaterRoutes);
 // Global Error Handler - captures all errors thrown in routes
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error("Caught error in Global Error Handler:", err);
-  const status = err.status || 500;
+
+  // Use status from error object, or from response if it was already set, or default to 500
+  const status = err.status || (res.statusCode !== 200 ? res.statusCode : 500);
+
   res.status(status).json({
     message: err.message || "Internal Server Error",
     stack: process.env.NODE_ENV === "production" ? null : err.stack,
+    // Add original error for easier debugging (stringified)
+    error: typeof err === 'string' ? err : err.message,
   });
 });
 

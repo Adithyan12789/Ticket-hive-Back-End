@@ -12,4 +12,4 @@ const CastSchema = new Schema<ICast>({
     image: { type: String, required: true },
 }, { timestamps: true });
 
-export const Cast = model<ICast>("Cast", CastSchema);
+export const Cast = mongoose.models.Cast || model<ICast>("Cast", CastSchema);

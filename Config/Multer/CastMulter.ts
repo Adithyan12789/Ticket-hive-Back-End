@@ -12,7 +12,13 @@ class CastImageUploads {
     }
 
     private static createStorage(): StorageEngine {
-        const uploadPath = path.join(baseDir, "Back-End/public", "CastImages");
+        // Try to find the public folder relative to the current working directory
+        const basePublicPath = fs.existsSync(path.join(process.cwd(), "public"))
+            ? path.join(process.cwd(), "public")
+            : path.join(process.cwd(), "Back-End", "public");
+
+        const uploadPath = path.join(basePublicPath, "CastImages");
+        console.log("CastMulter: Target upload path is:", uploadPath);
         this.ensureDirectoryExists(uploadPath);
 
         return multer.diskStorage({
