@@ -15,15 +15,20 @@ class EmailUtil {
 
         this.transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
-            port: 465,
-            secure: true, // use SSL
+            port: 587,
+            secure: false, // Use STARTTLS
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS,
             },
-            connectionTimeout: 10000, // 10 seconds
-            greetingTimeout: 10000,
+            tls: {
+                rejectUnauthorized: false, // Necessary for some cloud environments
+            },
+            connectionTimeout: 15000, // 15 seconds
+            greetingTimeout: 15000,
             socketTimeout: 30000,
+            debug: true,
+            logger: true
         });
     }
 

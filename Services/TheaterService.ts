@@ -84,7 +84,18 @@ export class TheaterService {
           otp
         );
 
-        await EmailUtil.sendOtpEmail(existingTheaterOwner.email, otp);
+        console.log(`[DEV] Fresh OTP for ${existingTheaterOwner.email}: ${otp}`);
+
+        try {
+          await EmailUtil.sendOtpEmail(existingTheaterOwner.email, otp);
+        } catch (emailError) {
+          console.error("Failed to send OTP email during retry:", emailError);
+          if (process.env.NODE_ENV === 'development') {
+            console.log("Proceeding because in development mode.");
+          } else {
+            throw emailError;
+          }
+        }
         return existingTheaterOwner;
       }
 
@@ -106,7 +117,18 @@ export class TheaterService {
       otpExpires: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
     });
 
-    await EmailUtil.sendOtpEmail(newTheaterOwner.email, otp);
+    console.log(`[DEV] Generated OTP for ${newTheaterOwner.email}: ${otp}`);
+
+    try {
+      await EmailUtil.sendOtpEmail(newTheaterOwner.email, otp);
+    } catch (emailError) {
+      console.error("Failed to send OTP email:", emailError);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Proceeding because in development mode. Check console for OTP.");
+      } else {
+        throw emailError;
+      }
+    }
     return newTheaterOwner;
   }
 
@@ -165,7 +187,7 @@ export class TheaterService {
     try {
       await EmailUtil.sendOtpEmail(theater.email, otp);
     } catch (err: any) {
-      throw new Error(`Failed to send OTP email: ${err.message}`);
+      throw new Error(`Failed to send OTP email: ${err.message} `);
     }
 
     return theater;
