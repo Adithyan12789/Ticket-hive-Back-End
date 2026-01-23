@@ -132,13 +132,9 @@ export class TheaterController {
             res
               .status(400)
               .json({ message: "Email exists but OTP is not verified." });
-          } else {
-            res
-              .status(500)
-              .json({ message: "An error occurred during registration" });
+          } else if (err instanceof Error) {
+            res.status(500).json({ message: err.message || "An error occurred during registration" });
           }
-        } else {
-          res.status(500).json({ message: "An unexpected error occurred" });
         }
       }
     }
