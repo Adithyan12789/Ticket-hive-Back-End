@@ -183,10 +183,26 @@ export class AdminService {
       throw new Error("Theater Owner not found");
     }
 
+    const html = `
+      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+        <h2 style="color: #2f855a;">Verification Approved!</h2>
+        <p>Hello <strong>${theaterOwner.name}</strong>,</p>
+        <p>Great news! Your theater <strong>${theater.name}</strong> has been successfully verified.</p>
+        <p>You can now log in to the partner portal and start managing your screens and shows.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/theater-login" style="background-color: #2f855a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+            Go to Portal
+          </a>
+        </div>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #718096;">&copy; ${new Date().getFullYear()} Ticket Hive Partner. All rights reserved.</p>
+      </div>
+    `;
     await this.sendVerificationEmail(
       theaterOwner.email,
-      "Verification Accepted",
-      "Your verification request has been accepted."
+      "Theater Verification Approved - Ticket Hive",
+      "Your verification request has been accepted.",
+      html
     );
     return { message: "Verification accepted and email sent." };
   }
@@ -211,11 +227,25 @@ export class AdminService {
       throw new Error("Theater Owner not found");
     }
 
-    const message = `Your verification request has been rejected for the following reason: ${reason}`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+        <h2 style="color: #e53e3e;">Verification Rejected</h2>
+        <p>Hello <strong>${theaterOwner.name}</strong>,</p>
+        <p>We regret to inform you that your verification request for <strong>${theater.name}</strong> has been rejected.</p>
+        <div style="background: #fff5f5; border-left: 4px solid #e53e3e; padding: 15px; margin: 20px 0;">
+          <strong>Reason for rejection:</strong><br/>
+          ${reason}
+        </div>
+        <p>Please address the issues mentioned above and re-submit your verification details in the portal.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #718096;">&copy; ${new Date().getFullYear()} Ticket Hive Partner. All rights reserved.</p>
+      </div>
+    `;
     await this.sendVerificationEmail(
       theaterOwner.email,
-      "Verification Rejected",
-      message
+      "Theater Verification Update - Ticket Hive",
+      `Your verification request has been rejected. Reason: ${reason}`,
+      html
     );
     return { message: "Verification rejected and email sent." };
   }
@@ -265,10 +295,11 @@ export class AdminService {
   private async sendVerificationEmail(
     recipient: string,
     subject: string,
-    message: string
+    message: string,
+    html?: string
   ) {
     try {
-      await EmailUtil.sendEmail(recipient, subject, message);
+      await EmailUtil.sendEmail(recipient, subject, message, html);
     } catch (error) {
       console.error("Error sending email:", error);
       throw error;

@@ -15,5 +15,5 @@ export interface ITheaterRepository {
     createTheater(theaterId: string, theaterData: any): Promise<ITheaterDetails | null>
     getAllTheaters(): Promise<ITheaterDetails[]>
     deleteOneById(id: string): Promise<boolean>;
-    
+    updateTheaterOwner(theaterOwnerId: string, updates: Partial<ITheaterOwner>): Promise<ITheaterOwner | null>;
 }  

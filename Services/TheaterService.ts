@@ -102,6 +102,8 @@ export class TheaterService {
       password: hashedPassword,
       otp,
       otpVerified: false,
+      otpGeneratedAt: new Date(),
+      otpExpires: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
     });
 
     await EmailUtil.sendOtpEmail(newTheaterOwner.email, otp);
@@ -114,13 +116,19 @@ export class TheaterService {
       throw new Error("Theater owner not found");
     }
 
-    const OTP_EXPIRATION_TIME = 5 * 60 * 1000;
+    const currentTime = new Date().getTime();
 
-    if (
-      new Date().getTime() - new Date(theater.otpGeneratedAt).getTime() >
-      OTP_EXPIRATION_TIME
-    ) {
-      throw new Error("OTP expired");
+    // Check if otpExpires exists (priority check)
+    if (theater.otpExpires) {
+      if (currentTime > new Date(theater.otpExpires).getTime()) {
+        throw new Error("OTP expired");
+      }
+    } else {
+      // Fallback to otpGeneratedAt
+      const OTP_EXPIRATION_TIME = 5 * 60 * 1000;
+      if (currentTime - new Date(theater.otpGeneratedAt).getTime() > OTP_EXPIRATION_TIME) {
+        throw new Error("OTP expired");
+      }
     }
 
     if (String(theater.otp) === String(otp)) {
@@ -141,10 +149,15 @@ export class TheaterService {
     const otp = crypto.randomInt(100000, 999999).toString();
 
     theater.otp = otp;
-    theater.otpExpires = new Date(Date.now() + 1 * 60 * 1000 + 59 * 1000);
+    theater.otpGeneratedAt = new Date();
+    theater.otpExpires = new Date(Date.now() + 5 * 60 * 1000); // Consistent 5 minutes
 
     try {
-      await this.theaterRepository.saveTheaterOwner(theater);
+      await this.theaterRepository.updateTheaterOwner(theater._id.toString(), {
+        otp: theater.otp,
+        otpGeneratedAt: theater.otpGeneratedAt,
+        otpExpires: theater.otpExpires,
+      });
     } catch (err) {
       throw new Error("Failed to save user with new OTP");
     }

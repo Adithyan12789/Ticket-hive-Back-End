@@ -201,10 +201,10 @@ export class TheaterController {
       try {
         const resetToken =
           await this.theaterService.forgotTheaterOwnerPasswordService(email);
-        const resetUrl = `http://localhost:5000/theater-reset-password/${resetToken}`;
-        const message = `Password reset link: ${resetUrl}`;
+        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+        const resetUrl = `${frontendUrl}/theater-reset-password/${resetToken}`;
 
-        await EmailUtil.sendOtpEmail(email, message);
+        await EmailUtil.sendResetPasswordEmail(email, resetUrl);
         res.status(200).json({ message: "Password reset email sent" });
       } catch (err: unknown) {
         if (err instanceof Error && err.message === "Theater Owner not found") {
