@@ -29,7 +29,7 @@ export interface CustomRequest extends Request {
 export class TheaterService {
   constructor(
     @inject("ITheaterRepository") private theaterRepository: ITheaterRepository
-  ) {}
+  ) { }
 
   public async authTheaterOwnerService(email: string, password: string) {
     const theater = await this.theaterRepository.findTheaterOwnerByEmail(email);
@@ -219,7 +219,7 @@ export class TheaterService {
       password: string;
     },
     profileImage: { filename: string | undefined }
-  ): Promise<any>  => {
+  ): Promise<any> => {
     const theaterOwner = await TheaterRepository.findTheaterOwnerById(
       theaterOwnerId
     );
@@ -280,7 +280,7 @@ export class TheaterService {
   public async getAllTheaters() {
     return await this.theaterRepository.getAllTheaters();
   }
-  
+
 
   public async getTheaterById(theaterId: string): Promise<ITheaterDetails | null> {
     try {
@@ -303,22 +303,26 @@ export class TheaterService {
   ): Promise<ITheaterDetails | null> {
     try {
       const theater = await this.theaterRepository.findTheaterById(theaterId);
-  
+
       if (!theater) {
         throw new Error("Theater not found");
       }
-  
+
       // Update the theater details as needed
       theater.name = updateData.name || theater.name;
       theater.city = updateData.city || theater.city;
-      theater.address = updateData.address || theater.address;
+      theater.addressLine1 = updateData.addressLine1 || theater.addressLine1;
+      theater.addressLine2 = updateData.addressLine2 || theater.addressLine2;
+      theater.pincode = updateData.pincode || theater.pincode;
+      theater.state = updateData.state || theater.state;
+      theater.country = updateData.country || theater.country;
       theater.description = updateData.description || theater.description;
       theater.amenities = updateData.amenities
         ? updateData.amenities.map((item: string) => item.trim())
         : theater.amenities;
       theater.latitude = updateData.latitude || theater.latitude;
       theater.longitude = updateData.longitude || theater.longitude;
-  
+
       // Handling images and other fields
       if (files && files.length > 0) {
         const newImages = files
@@ -326,10 +330,10 @@ export class TheaterService {
             return file.path.split("\\").pop()?.split("/").pop();
           })
           .filter((image: string | undefined) => image !== undefined);
-  
+
         theater.images = newImages;
       }
-  
+
       if (
         Array.isArray(updateData.removeImages) &&
         updateData.removeImages.length > 0
@@ -338,19 +342,19 @@ export class TheaterService {
           (image: string) => !updateData.removeImages!.includes(image)
         );
       }
-  
+
       // Save the updated theater and return the updated theater
       const updatedTheater = await theater.save();
       return updatedTheater;
     } catch (error) {
       throw error;
     }
-  }  
+  }
 
   public async deleteTheaterService(id: string): Promise<boolean> {
     const deletedTheater = await this.theaterRepository.deleteOneById(id);
     return deletedTheater;
-  }  
+  }
 
   public getTheatersByMovieTitle = async (movieTitle: string) => {
     try {

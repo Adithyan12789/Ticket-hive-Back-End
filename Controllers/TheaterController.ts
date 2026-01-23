@@ -23,8 +23,8 @@ export class TheaterController {
   constructor(
     @inject("ITheaterService") private readonly theaterService: ITheaterService,
     @inject("IOfferService") private readonly offerService: IOfferService,
-  ) {}
-  
+  ) { }
+
   authTheaterOwner = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { email, password } = req.body;
@@ -273,7 +273,7 @@ export class TheaterController {
     async (req: CustomRequest, res: Response): Promise<void> => {
 
       const theaterOwnerId = req.theaterOwner?._id || null;
-      
+
       if (!theaterOwnerId) {
         res.status(401).json({ message: "Unauthorized" });
         return;
@@ -361,7 +361,11 @@ export class TheaterController {
       const {
         name,
         city,
-        address,
+        addressLine1,
+        addressLine2,
+        pincode,
+        state,
+        country,
         showTimes,
         description,
         amenities,
@@ -373,7 +377,10 @@ export class TheaterController {
       if (
         !name ||
         !city ||
-        !address ||
+        !addressLine1 ||
+        !pincode ||
+        !state ||
+        !country ||
         !showTimes ||
         !description ||
         !latitude ||
@@ -391,8 +398,8 @@ export class TheaterController {
 
       const images: string[] = Array.isArray(req.files)
         ? req.files.map((file: Express.Multer.File) => {
-            return file.filename;
-          })
+          return file.filename;
+        })
         : [];
 
       try {
@@ -406,7 +413,11 @@ export class TheaterController {
             theaterOwnerId: new mongoose.Types.ObjectId(req.theaterOwner._id),
             name,
             city,
-            address,
+            addressLine1,
+            addressLine2,
+            pincode,
+            state,
+            country,
             showTimes: showTimesArray.map((time: string) => time.trim()),
             images,
             description,
@@ -462,7 +473,7 @@ export class TheaterController {
     }
   );
 
-    public updateTheaterHandler = asyncHandler(
+  public updateTheaterHandler = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { id } = req.params;
       const updateData = req.body;
@@ -492,15 +503,15 @@ export class TheaterController {
     async (req: CustomRequest, res: Response): Promise<void> => {
 
       const { id } = req.params;
-  
+
       try {
         const deletedTheater = await this.theaterService.deleteTheaterService(id);
-  
+
         if (!deletedTheater) {
           res.status(404).json({ message: "Theater not found for deletion" });
           return;
         }
-  
+
         res
           .status(200)
           .json({ message: "Theater deleted successfully", deletedTheater });
@@ -512,32 +523,32 @@ export class TheaterController {
       }
     }
   );
-  
+
 
   getTheatersByMovieTitle = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       const { movieTitle } = req.params;
       const { userId, date } = req.query;
-  
+
       try {
         const user = await User.findById(userId).select("-password");
         if (!user) {
           res.status(404).json({ message: "User not found" });
           return;
         }
-  
+
         let movie;
         if (mongoose.Types.ObjectId.isValid(movieTitle)) {
           movie = await Movie.findById(movieTitle);
         } else {
           movie = await Movie.findOne({ title: movieTitle });
         }
-  
+
         if (!movie) {
           res.status(404).json({ message: "Movie not found" });
           return;
         }
-  
+
         const screens = await Screens.find({
           schedule: { $exists: true, $ne: [] },
         })
@@ -553,7 +564,7 @@ export class TheaterController {
               select: "title",
             },
           });
-  
+
         const screensWithMovie = screens.filter((screen) =>
           (screen.schedule as unknown as ISchedule[]).some((schedule) =>
             schedule.showTimes.some(
@@ -564,7 +575,7 @@ export class TheaterController {
             )
           )
         );
-  
+
         const theaters = screensWithMovie
           .map((screen) => screen.theater)
           .filter(
@@ -583,7 +594,7 @@ export class TheaterController {
           .populate({ path: "showTimes.movie", select: "title" });
 
         if (date && typeof date === "string") {
-          
+
           const selectedDate = new Date(date);
 
           filteredSchedules = filteredSchedules.filter((schedule) =>
@@ -597,7 +608,7 @@ export class TheaterController {
             })
           );
         }
-  
+
         res.status(200).json({
           user,
           theaters,
@@ -613,38 +624,38 @@ export class TheaterController {
       }
     }
   );
-  
+
   getStatsController = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       try {
         const { ownerId } = req.params;
-  
+
         // Fetch theaters for the given owner
         const theaters = await TheaterDetails.find({ theaterOwnerId: ownerId });
-  
+
         // Fetch bookings for these theaters, populating user and movie details
         const bookings = await Booking.find({
           theater: { $in: theaters.map((t) => t._id) },
         })
           .populate("user", "_id name email")
           .populate("movie", "title");  // Populate movie title
-  
+
         // Calculate total earnings from all bookings
         const totalEarnings = bookings.reduce(
           (sum, booking) => sum + booking.totalPrice,
           0
         );
-  
+
         // Calculate unique users by creating a Set of user IDs
         const uniqueUsers = new Set(
           bookings.map((booking) => booking.user._id.toString())
         );
-  
+
         // Calculate unique movies by creating a Set of movie IDs
         const uniqueMovies = new Set(
           bookings.map((booking) => booking.movie._id.toString())
         );
-  
+
         // Prepare stats
         const stats = {
           theaters: theaters.length,
@@ -653,7 +664,7 @@ export class TheaterController {
           bookings: bookings.length,
           totalEarnings,
         };
-  
+
         // Return the stats and bookings with populated movie titles
         res.status(200).json({ stats, theaters, bookings });
       } catch (error) {
@@ -661,8 +672,8 @@ export class TheaterController {
         res.status(500).json({ message: "Error fetching data", error: error });
       }
     }
-  );  
-  
+  );
+
 
   logoutTheaterOwner = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {

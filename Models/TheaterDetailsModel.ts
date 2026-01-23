@@ -3,7 +3,11 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 export interface ITheaterDetails extends Document {
     name: string;
     city: string;
-    address: string;
+    addressLine1: string;
+    addressLine2?: string;
+    pincode: string;
+    state: string;
+    country: string;
     images: string[];
     showTimes: string[];
     description: string;
@@ -26,7 +30,11 @@ const theaterDetailsSchema: Schema<ITheaterDetails> = new Schema(
     {
         name: { type: String, required: true },
         city: { type: String, required: true },
-        address: { type: String, required: true },
+        addressLine1: { type: String, required: true },
+        addressLine2: { type: String, required: false },
+        pincode: { type: String, required: true },
+        state: { type: String, required: true },
+        country: { type: String, required: true },
         images: { type: [String], required: true, default: [] },
         showTimes: { type: [String], required: true, default: [] },
         description: { type: String, required: true },
@@ -60,7 +68,7 @@ const theaterDetailsSchema: Schema<ITheaterDetails> = new Schema(
             },
         },
         movies: { type: [String], required: false },
-        ticketPrice: { type: Number, required: true }, 
+        ticketPrice: { type: Number, required: true },
     },
     {
         timestamps: true,

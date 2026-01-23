@@ -10,7 +10,11 @@ export interface theaterType {
   theaterOwnerId: mongoose.Types.ObjectId;
   name: string;
   city: string;
-  address: string;
+  addressLine1: string;
+  addressLine2?: string;
+  pincode: string;
+  state: string;
+  country: string;
   showTimes: string[];
   images: string[];
   description: string;
