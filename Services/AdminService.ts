@@ -19,7 +19,7 @@ export interface BookingDetails {
   _id: string;
   bookingId: string;
   user: { _id: string; name: string; email: string };
-  theater: { _id: string; name: string; images: string[]; address: string };
+  theater: { _id: string; name: string; images: string[]; addressLine1: string; city: string; state: string; pincode: string };
   showTime: string;
   seats: string[];
   status: "pending" | "completed" | "cancelled" | "failed";
@@ -244,7 +244,7 @@ export class AdminService {
       movieTitle: booking.movie.title,
       theaterName: booking.theater.name,
       images: booking.theater.images,
-      address: booking.theater.address,
+      address: `${booking.theater.addressLine1}, ${booking.theater.city}, ${booking.theater.state} - ${booking.theater.pincode}`,
       screenName: booking.screen.screenNumber,
       seats: booking.seats,
       showTime: booking.showTime,

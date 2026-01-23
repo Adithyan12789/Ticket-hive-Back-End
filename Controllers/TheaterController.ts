@@ -555,7 +555,7 @@ export class TheaterController {
           .populate({
             path: "theater",
             select:
-              "name location amenities description ticketPrice owner address city longitude latitude",
+              "name amenities description ticketPrice owner addressLine1 addressLine2 pincode state country city longitude latitude",
           })
           .populate({
             path: "schedule",

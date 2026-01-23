@@ -8,7 +8,7 @@ class ScreenRepository implements IScreenRepository {
   public async getScreenById(screenId: string): Promise<any | null> {
     return await Screens.findById(screenId).populate({
       path: 'theater',
-      select: 'name city address',
+      select: 'name city addressLine1 addressLine2 pincode state country',
     });
   }
 

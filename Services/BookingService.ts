@@ -22,7 +22,7 @@ export interface BookingDetails {
   _id: string;
   bookingId: string;
   user: { _id: string; name: string; email: string };
-  theater: { _id: string; name: string; images: string[]; address: string };
+  theater: { _id: string; name: string; images: string[]; addressLine1: string; city: string; state: string; pincode: string };
   showTime: string;
   seats: string[];
   status: "pending" | "completed" | "cancelled" | "failed";
@@ -43,7 +43,7 @@ export class BookingService {
     @inject("IBookingRepository") private bookingRepository: IBookingRepository,
     @inject("IMovieRepository") private movieRepository: IMovieRepository,
     @inject("IWalletRepository") private walletRepository: IWalletRepository,
-  ) {}
+  ) { }
 
   public async createBookingService(
     movieId: string,
@@ -164,7 +164,7 @@ export class BookingService {
       movieTitle: booking.movie.title,
       theaterName: booking.theater.name,
       images: booking.theater.images,
-      address: booking.theater.address,
+      address: `${booking.theater.addressLine1}, ${booking.theater.city}, ${booking.theater.state} - ${booking.theater.pincode}`,
       screenName: booking.screen.screenNumber,
       seats: booking.seats,
       showTime: booking.showTime,
@@ -240,11 +240,9 @@ export class BookingService {
       type: "credit",
       status: "success",
       date: new Date(),
-      description: `Refund: "${
-        movieDetails.title
-      }" on ${bookingDate.toLocaleDateString()}, ${showTime}, Screen ${
-        screen.screenNumber
-      }, Seats: ${seats.join(", ")}`,
+      description: `Refund: "${movieDetails.title
+        }" on ${bookingDate.toLocaleDateString()}, ${showTime}, Screen ${screen.screenNumber
+        }, Seats: ${seats.join(", ")}`,
     };
 
     wallet.transactions.push(transaction);
@@ -259,11 +257,11 @@ export class BookingService {
     const ticket = await this.bookingRepository.findTicketById(ticketId);
     if (!ticket) throw new Error("Ticket not found");
     return ticket;
-  }  
-  
+  }
+
   public async getBookingDetails(bookingId: string) {
     const booking = await this.bookingRepository.findBookingById(bookingId);
-    
+
     if (!booking) throw new Error("Booking not found");
     return booking;
   }
