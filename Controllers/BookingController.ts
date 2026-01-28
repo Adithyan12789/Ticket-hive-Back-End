@@ -15,7 +15,7 @@ export class BookingController {
     @inject("IBookingService") private readonly bookingService: IBookingService,
     @inject("INotificationService") private readonly notificationService: INotificationService,
     @inject("IWalletService") private readonly walletService: IWalletService,
-  ) {}
+  ) { }
 
   public createBooking = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
@@ -76,7 +76,7 @@ export class BookingController {
         }
 
         const nextDay = new Date(bookingDate);
-        nextDay.setDate(nextDay.getDate()+ 1);
+        nextDay.setDate(nextDay.getDate() + 1);
         const formattedNextDay = nextDay.toISOString();
 
         const booking = await this.bookingService.createBookingService(
@@ -139,12 +139,12 @@ export class BookingController {
     async (req: CustomRequest, res: Response): Promise<void> => {
       try {
         const { userId } = req.params;
-        
+
         if (!userId) {
           res.status(401).json({ message: "Unauthorized access" });
           return;
         }
-  
+
         const tickets = await this.bookingService.getAllTicketsService(userId);
 
         if (!tickets || tickets.length === 0) {
@@ -160,11 +160,11 @@ export class BookingController {
               ticket,
               movieDetails: movie
                 ? {
-                    title: movie.title,
-                    poster: movie.posters,
-                    duration: movie.duration,
-                    genre: movie.genres,
-                  }
+                  title: movie.title,
+                  poster: movie.posters,
+                  duration: movie.duration,
+                  genre: movie.genres,
+                }
                 : null,
             };
           })
@@ -235,7 +235,7 @@ export class BookingController {
       }
     }
   );
-  
+
   getTicketDetails = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       try {

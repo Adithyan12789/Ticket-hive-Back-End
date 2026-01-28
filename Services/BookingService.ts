@@ -128,25 +128,50 @@ export class BookingService {
     await schedule.save();
 
     // Create the new booking record
-    const newBooking = await this.bookingRepository.createBooking({
-      movie: new mongoose.Types.ObjectId(movieId),
-      theater: new mongoose.Types.ObjectId(theaterId),
-      screen: new mongoose.Types.ObjectId(screenId),
-      offer: offerId ? new mongoose.Types.ObjectId(offerId) : null,
-      seats: seatIds,
-      bookingDate: schedule.date,
-      showTime,
-      paymentStatus: paymentStatus as "pending" |
-        "confirmed" |
-        "cancelled" |
-        "failed",
-      paymentMethod: paymentMethod || "default",
-      convenienceFee,
-      user: new mongoose.Types.ObjectId(userId),
-      totalPrice,
-    });
+    try {
+      console.log("🎫 Creating new booking...");
+      console.log("User ID:", userId);
+      console.log("Movie ID:", movieId);
+      console.log("Theater ID:", theaterId);
+      console.log("Screen ID:", screenId);
+      console.log("Seats:", seatIds);
+      console.log("Show Time:", showTime);
+      console.log("Booking Date:", schedule.date);
+      console.log("Payment Status:", paymentStatus);
+      console.log("Payment Method:", paymentMethod);
+      console.log("Total Price:", totalPrice);
+      console.log("Convenience Fee:", convenienceFee);
+      console.log("Offer ID:", offerId);
 
-    return newBooking;
+      const newBooking = await this.bookingRepository.createBooking({
+        movie: new mongoose.Types.ObjectId(movieId),
+        theater: new mongoose.Types.ObjectId(theaterId),
+        screen: new mongoose.Types.ObjectId(screenId),
+        offer: offerId ? new mongoose.Types.ObjectId(offerId) : null,
+        seats: seatIds,
+        bookingDate: schedule.date,
+        showTime,
+        paymentStatus: paymentStatus as "pending" |
+          "confirmed" |
+          "cancelled" |
+          "failed",
+        paymentMethod: paymentMethod || "default",
+        convenienceFee,
+        user: new mongoose.Types.ObjectId(userId),
+        totalPrice,
+      });
+
+      console.log("✅ Booking created successfully with ID:", newBooking._id);
+      return newBooking;
+    } catch (error: any) {
+      console.error("❌ Failed to create booking:", error);
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      throw new Error(`Booking creation failed: ${error.message}`);
+    }
   }
 
   public async getAllTicketsService(userId: string) {

@@ -3,12 +3,12 @@ import User, { IUser } from "../Models/UserModel";
 import { injectable } from "inversify";
 import { BaseRepository } from "./Base/BaseRepository";
 import { IBookingRepository } from "../Interface/IBooking/IRepository";
+import mongoose from "mongoose";
 
 @injectable()
 export class BookingRepository
   extends BaseRepository<IBooking>
-  implements IBookingRepository
-{
+  implements IBookingRepository {
   private readonly bookModel = Booking;
 
   constructor() {
@@ -21,7 +21,7 @@ export class BookingRepository
       .populate("movie theater screen")
       .lean();
   }
-  
+
   public async findUserById(userId: string): Promise<IUser | null> {
     return await User.findById(userId);
   }
@@ -33,7 +33,7 @@ export class BookingRepository
   public async findTicketById(ticketId: string): Promise<any | null> {
     return await Booking.findById(ticketId).populate("movie theater screen");
   }
-  
+
   public async findBookingById(bookingId: string): Promise<any | null> {
     return await Booking.findById(bookingId).populate("movie theater screen");
   }
@@ -43,7 +43,32 @@ export class BookingRepository
   }
 
   public async createBooking(data: Partial<IBooking>) {
-    return await Booking.create(data);
+    try {
+      // Check database connection
+      if (mongoose.connection.readyState !== 1) {
+        console.error("❌ Database not connected. Connection state:", mongoose.connection.readyState);
+        throw new Error("Database connection is not ready");
+      }
+
+      console.log("📝 Creating booking with data:", JSON.stringify(data, null, 2));
+
+      const newBooking = await Booking.create(data);
+
+      console.log("✅ Booking created successfully:", newBooking._id);
+      console.log("📊 Booking details:", JSON.stringify(newBooking, null, 2));
+
+      return newBooking;
+    } catch (error: any) {
+      console.error("❌ Error creating booking:", error);
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+
+      if (error.errors) {
+        console.error("Validation errors:", JSON.stringify(error.errors, null, 2));
+      }
+
+      throw new Error(`Failed to create booking: ${error.message}`);
+    }
   }
 
   public async updateBookingStatus(bookingId: string, status: string): Promise<IBooking | null> {
@@ -53,7 +78,7 @@ export class BookingRepository
         { paymentStatus: status },
         { new: true }
       ).exec();
-      
+
       return updatedBooking;
     } catch (error: any) {
       console.error("Error updating booking status:", error.message);

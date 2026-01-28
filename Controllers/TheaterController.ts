@@ -534,7 +534,7 @@ export class TheaterController {
           return;
         }
 
-        let movie;
+        let movie: any;
         if (mongoose.Types.ObjectId.isValid(movieTitle)) {
           movie = await Movie.findById(movieTitle);
         } else {
@@ -563,23 +563,23 @@ export class TheaterController {
           });
 
         const screensWithMovie = screens.filter((screen) =>
-          (screen.schedule as unknown as ISchedule[]).some((schedule) =>
+          (screen.schedule as unknown as any[]).some((schedule) =>
             schedule.showTimes.some(
-              (showTime) =>
-                (showTime.movie as unknown as mongoose.Types.ObjectId).equals(
-                  movie._id as mongoose.Types.ObjectId
-                )
+              (showTime: any) => {
+                const showTimeMovieId = showTime.movie?._id || showTime.movie;
+                return showTimeMovieId && showTimeMovieId.toString() === movie._id.toString();
+              }
             )
           )
         );
 
         const theaters = screensWithMovie
-          .map((screen) => screen.theater)
+          .map((screen: any) => screen.theater)
           .filter(
             (value, index, self) =>
               value &&
               self.findIndex(
-                (t) => t._id.toString() === value._id.toString()
+                (t: any) => t._id.toString() === value._id.toString()
               ) === index
           );
 
@@ -591,19 +591,15 @@ export class TheaterController {
           .populate({ path: "showTimes.movie", select: "title" });
 
         if (date && typeof date === "string") {
-
           const selectedDate = new Date(date);
-
-          filteredSchedules = filteredSchedules.filter((schedule) =>
-            schedule.showTimes.some((showTime) => {
-              const showTimeDate = new Date(showTime.time);
-              return (
-                showTimeDate.getFullYear() === selectedDate.getFullYear() &&
-                showTimeDate.getMonth() === selectedDate.getMonth() &&
-                showTimeDate.getDate() === selectedDate.getDate()
-              );
-            })
-          );
+          filteredSchedules = filteredSchedules.filter((schedule) => {
+            const scheduleDate = new Date(schedule.date);
+            return (
+              scheduleDate.getFullYear() === selectedDate.getFullYear() &&
+              scheduleDate.getMonth() === selectedDate.getMonth() &&
+              scheduleDate.getDate() === selectedDate.getDate()
+            );
+          });
         }
 
         res.status(200).json({
